@@ -1,0 +1,63 @@
+name: fork snapshot
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - name: Build embedded frontend
+        working-directory: html
+        run: |
+          npx --yes --package=@yarnpkg/cli-dist@3.6.3 yarn install --immutable
+          npx --yes --package=@yarnpkg/cli-dist@3.6.3 yarn build
+      - uses: actions/upload-artifact@v7
+        with:
+          name: embedded-frontend
+          path: src/html.h
+          if-no-files-found: error
+  linux:
+    needs: frontend
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [x86_64, aarch64]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v8
+        with:
+          name: embedded-frontend
+          path: src
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y autoconf automake build-essential cmake curl file libtool
+      - name: Build static binary
+        env:
+          BUILD_TARGET: ${{ matrix.target }}
+          CROSS_ROOT: ${{ runner.temp }}/cross
+          STAGE_ROOT: ${{ runner.temp }}/stage
+          BUILD_ROOT: ${{ runner.temp }}/build
+        run: ./scripts/cross-build.sh
+      - name: Inspect binary
+        run: |
+          file build/ttyd
+          if [ '${{ matrix.target }}' = x86_64 ]; then
+            ./build/ttyd --version
+          fi
+          mkdir -p dist
+          cp build/ttyd dist/ttyd.linux-${{ matrix.target }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ttyd-linux-${{ matrix.target }}
+          path: dist/*
+          if-no-files-found: error
