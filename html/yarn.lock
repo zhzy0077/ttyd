@@ -8067,6 +8067,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"playwright-core@npm:1.63.0":
+  version: 1.63.0
+  resolution: "playwright-core@npm:1.63.0"
+  bin:
+    playwright-core: cli.js
+  checksum: b4c190c4099d0620a9ba22a0e826194ad511c3149153a79c44dc632ac2058da7da01cf66f011ee3ee0f360bbd83aa2f67f04519eb3c7c2bea257c4f598537937
+  languageName: node
+  linkType: hard
+
+"playwright@npm:1.63.0":
+  version: 1.63.0
+  resolution: "playwright@npm:1.63.0"
+  dependencies:
+    playwright-core: 1.63.0
+  bin:
+    playwright: cli.js
+  checksum: 6f90bca3d61f509667b9fdc4ef9c845833e4cb3cbb1c0d4e26672efb66b97b7f7db47d6a947a66772a23c191859639a6db0211c7753e6a1a5bc42293fd226c5a
+  languageName: node
+  linkType: hard
+
 "plugin-error@npm:^0.1.2":
   version: 0.1.2
   resolution: "plugin-error@npm:0.1.2"
@@ -10517,6 +10537,7 @@ __metadata:
     gulp-rename: ^2.0.0
     html-webpack-plugin: ^5.6.0
     mini-css-extract-plugin: ^2.8.1
+    playwright: 1.63.0
     preact: ^10.19.6
     sass: ^1.71.1
     sass-loader: ^14.1.1

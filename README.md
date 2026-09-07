@@ -87,6 +87,30 @@ OPTIONS:
 
 Read the example usage on the [wiki](https://github.com/tsl0922/ttyd/wiki/Example-Usage).
 
+## Terminal settings
+
+Use the gear button in the bottom-right corner to configure the terminal in
+your browser. The panel includes Dark, Light, Nord, and Dracula themes, custom
+text/background/cursor colors, a font family field with suggestions, font size,
+and an option to suppress the terminal's right-click menu. Fonts must be
+installed on the browser's device. Right-click suppression does not enable
+clipboard paste; Firefox still allows Shift + right-click to open its menu.
+
+Choices are saved in localStorage per origin and URL path. They override server
+and URL client options on startup and reconnect. **Reset to server defaults**
+clears these choices and restores the server/URL settings. Font changes refit
+the terminal automatically, including after a font finishes loading.
+
+To run the browser regression checks after building the frontend:
+
+```sh
+cd html
+yarn install --immutable
+yarn build
+yarn playwright install chromium firefox
+TTYD_BINARY=/absolute/path/to/ttyd node --test tests/settings.test.cjs
+```
+
 ## Browser Support
 
 Modern browsers, See [Browser Support](https://github.com/xtermjs/xterm.js#browser-support).

@@ -4,7 +4,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 project(ttyd VERSION 1.7.7 LANGUAGES C)
 
-set(TTYD_VERSION "${PROJECT_VERSION}")
+set(TTYD_VERSION "${PROJECT_VERSION}-alpha.2")
 
 include(GetGitVersion)
 get_git_version(GIT_VERSION SEM_VER)
@@ -13,7 +13,7 @@ if("${SEM_VER}" VERSION_GREATER "${TTYD_VERSION}")
     set(TTYD_VERSION "${SEM_VER}")
 endif()
 if(NOT "${GIT_COMMIT}" STREQUAL "")
-    set(TTYD_VERSION "${TTYD_VERSION}-${GIT_COMMIT}")
+    set(TTYD_VERSION "${TTYD_VERSION}+${GIT_COMMIT}")
 endif()
 
 if(NOT MSVC)

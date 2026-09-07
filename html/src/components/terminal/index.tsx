@@ -29,6 +29,7 @@ export class Terminal extends Component<Props, State> {
     }
 
     componentWillUnmount() {
+        this.xterm.disposeSettings();
         this.xterm.dispose();
     }
 

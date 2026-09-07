@@ -10,6 +10,7 @@ import { ImageAddon } from '@xterm/addon-image';
 import { Unicode11Addon } from '@xterm/addon-unicode11';
 import { OverlayAddon } from './addons/overlay';
 import { ZmodemAddon } from './addons/zmodem';
+import { TerminalSettings } from '../settings';
 
 import '@xterm/xterm/css/xterm.css';
 
@@ -77,6 +78,7 @@ function addEventListener(target: EventTarget, type: string, listener: EventList
 }
 
 export class Xterm {
+    private settings?: TerminalSettings;
     private disposables: IDisposable[] = [];
     private textEncoder = new TextEncoder();
     private textDecoder = new TextDecoder();
@@ -114,6 +116,10 @@ export class Xterm {
             d.dispose();
         }
         this.disposables.length = 0;
+    }
+
+    public disposeSettings() {
+        this.settings?.dispose();
     }
 
     @bind
@@ -167,6 +173,7 @@ export class Xterm {
 
         terminal.open(parent);
         fitAddon.fit();
+        this.settings = new TerminalSettings(terminal, () => fitAddon.fit());
     }
 
     @bind
@@ -184,7 +191,9 @@ export class Xterm {
         register(
             terminal.onResize(({ cols, rows }) => {
                 const msg = JSON.stringify({ columns: cols, rows: rows });
-                this.socket?.send(this.textEncoder.encode(Command.RESIZE_TERMINAL + msg));
+                if (this.socket?.readyState === WebSocket.OPEN) {
+                    this.socket.send(this.textEncoder.encode(Command.RESIZE_TERMINAL + msg));
+                }
                 if (this.resizeOverlay) overlayAddon.showOverlay(`${cols}x${rows}`, 300);
             })
         );
@@ -370,6 +379,7 @@ export class Xterm {
     @bind
     private applyPreferences(prefs: Preferences) {
         const { terminal, fitAddon, register } = this;
+        this.settings?.restoreDefaults();
         if (prefs.enableZmodem || prefs.enableTrzsz) {
             this.zmodemAddon = new ZmodemAddon({
                 zmodem: prefs.enableZmodem,
@@ -466,6 +476,8 @@ export class Xterm {
                     break;
             }
         }
+        this.settings?.captureDefaults();
+        this.settings?.apply();
     }
 
     @bind
