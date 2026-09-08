@@ -10,6 +10,7 @@ import { ImageAddon } from '@xterm/addon-image';
 import { Unicode11Addon } from '@xterm/addon-unicode11';
 import { OverlayAddon } from './addons/overlay';
 import { ZmodemAddon } from './addons/zmodem';
+import { encodeInputFrames } from './input';
 import { TerminalSettings } from '../settings';
 
 import '@xterm/xterm/css/xterm.css';
@@ -240,15 +241,8 @@ export class Xterm {
         const { socket, textEncoder } = this;
         if (socket?.readyState !== WebSocket.OPEN) return;
 
-        if (typeof data === 'string') {
-            const payload = new Uint8Array(data.length * 3 + 1);
-            payload[0] = Command.INPUT.charCodeAt(0);
-            const stats = textEncoder.encodeInto(data, payload.subarray(1));
-            socket.send(payload.subarray(0, (stats.written as number) + 1));
-        } else {
-            const payload = new Uint8Array(data.length + 1);
-            payload[0] = Command.INPUT.charCodeAt(0);
-            payload.set(data, 1);
+        const bytes = typeof data === 'string' ? textEncoder.encode(data) : data;
+        for (const payload of encodeInputFrames(bytes)) {
             socket.send(payload);
         }
     }

@@ -237,6 +237,11 @@ int callback_tty(struct lws *wsi, enum lws_callback_reasons reason, void *user, 
       pss->authenticated = false;
       pss->wsi = wsi;
       pss->lws_close_status = LWS_CLOSE_STATUS_NOSTATUS;
+#ifndef LWS_WITHOUT_EXTENSIONS
+      /* pmd inflate/deflate default to 1024 bytes; 16 => 64KiB, matching srv-buf-size. */
+      lws_set_extension_option(wsi, "permessage-deflate", "rx_buf_size", "16");
+      lws_set_extension_option(wsi, "permessage-deflate", "tx_buf_size", "16");
+#endif
 
       if (server->url_arg) {
         while (lws_hdr_copy_fragment(wsi, buf, sizeof(buf), WSI_TOKEN_HTTP_URI_ARGS, n++) > 0) {
