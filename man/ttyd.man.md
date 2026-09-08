@@ -84,7 +84,7 @@ ttyd 1 "September 2016" ttyd "User Manual"
       Websocket ping interval(sec) (default: 5)
 
   -f, --srv-buf-size
-      Maximum chunk of file (in bytes) that can be sent at once, a larger value may improve throughput (default: 4096)
+      Maximum chunk of file (in bytes) that can be sent at once, a larger value may improve throughput (default: 65536)
 
   -6, --ipv6
       Enable IPv6 support

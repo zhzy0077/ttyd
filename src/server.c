@@ -118,7 +118,7 @@ static void print_help() {
 #if LWS_LIBRARY_VERSION_NUMBER >= 4000000
           "    -P, --ping-interval     Websocket ping interval(sec) (default: 5)\n"
 #endif
-          "    -f, --srv-buf-size      Maximum chunk of file (in bytes) that can be sent at once, a larger value may improve throughput (default: 4096)\n"
+          "    -f, --srv-buf-size      Maximum chunk of file (in bytes) that can be sent at once, a larger value may improve throughput (default: 65536)\n"
 #ifdef LWS_WITH_IPV6
           "    -6, --ipv6              Enable IPv6 support\n"
 #endif
@@ -329,6 +329,7 @@ int main(int argc, char **argv) {
   info.extensions = extensions;
 #endif
   info.max_http_header_data = 65535;
+  info.pt_serv_buf_size = 65536;
 
   int debug_level = LLL_ERR | LLL_WARN | LLL_NOTICE;
   char iface[128] = "";
