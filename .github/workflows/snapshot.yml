@@ -88,13 +88,15 @@ jobs:
       - name: Attach binaries to GitHub release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
           TAG: ${{ inputs.release_tag || github.ref_name }}
         run: |
           set -euo pipefail
           cd dist
+          ls -l
           sha256sum ttyd.linux-* > SHA256SUMS
           if ! gh release view "$TAG" >/dev/null 2>&1; then
-            gh release create "$TAG" --prerelease --verify-tag \
+            gh release create "$TAG" --prerelease \
               --title "ttyd $TAG" \
               --notes "Unofficial prerelease from zhzy0077/ttyd."
           fi
