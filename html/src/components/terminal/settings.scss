@@ -102,7 +102,12 @@
         flex-direction: row;
         align-items: center;
     }
+    [data-upload],
     [data-reset] {
-        margin: 16px 0 8px;
+        width: 100%;
+        margin: 8px 0;
+    }
+    [data-reset] {
+        margin-top: 8px;
     }
 }

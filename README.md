@@ -92,7 +92,8 @@ Read the example usage on the [wiki](https://github.com/tsl0922/ttyd/wiki/Exampl
 Use the gear button in the bottom-right corner to configure the terminal in
 your browser. The panel includes Dark, Light, Nord, and Dracula themes, custom
 text/background/cursor colors, a font family field with suggestions, font size,
-and an option to suppress the terminal's right-click menu. Fonts must be
+an option to suppress the terminal's right-click menu, and an **Upload file**
+button that writes to `/tmp/ttyd` and copies the server path to the clipboard. Fonts must be
 installed on the browser's device. Right-click suppression does not enable
 clipboard paste; Firefox still allows Shift + right-click to open its menu.
 

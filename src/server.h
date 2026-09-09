@@ -22,6 +22,7 @@ struct endpoints {
   char *index;
   char *token;
   char *parent;
+  char *upload;
 };
 
 extern volatile bool force_exit;
@@ -31,9 +32,12 @@ extern struct endpoints endpoints;
 
 struct pss_http {
   char path[128];
+  char dest[256];
   char *buffer;
   char *ptr;
   size_t len;
+  int fd;
+  bool upload;
 };
 
 struct pss_tty {

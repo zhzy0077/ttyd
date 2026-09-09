@@ -179,6 +179,8 @@ export class TerminalSettings {
                 <label>Font size (px)<input name="fontSize" type="number" min="8" max="48" step="1"></label>
                 <label class="settings-checkbox"><input name="suppressContextMenu" type="checkbox">Suppress terminal right-click menu</label>
                 <small>Does not enable paste. Firefox can still show its menu with Shift + right-click.</small>
+                <button type="button" data-upload>Upload file</button>
+                <input type="file" data-upload-input hidden multiple>
                 <button type="button" data-reset>Reset to server defaults</button>
                 <small role="status" aria-live="polite"></small>
             </section>`;
@@ -191,6 +193,14 @@ export class TerminalSettings {
             this.settings = {};
             this.persist(true);
             this.apply();
+        });
+        const fileInput = this.root.querySelector('[data-upload-input]') as HTMLInputElement;
+        this.root.querySelector('[data-upload]')?.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', event => {
+            event.stopPropagation();
+            const files = Array.from(fileInput.files || []);
+            fileInput.value = '';
+            if (files.length) void this.upload(files);
         });
         this.panel.addEventListener('change', this.onChange);
         this.panel.addEventListener('keydown', event => {
@@ -231,6 +241,7 @@ export class TerminalSettings {
     private onChange = (event: Event) => {
         const input = event.target as HTMLInputElement;
         const { name, value } = input;
+        if (!name) return;
         if (name === 'fontSize' && !input.checkValidity()) {
             input.reportValidity();
             return;
@@ -247,6 +258,34 @@ export class TerminalSettings {
         this.persist();
         this.apply();
     };
+
+    private async upload(files: File[]) {
+        const prefix = window.location.pathname.replace(/[/]+$/, '');
+        const paths: string[] = [];
+        this.status.textContent = 'Uploading…';
+        try {
+            for (const file of files) {
+                const res = await fetch(`${prefix}/upload?name=${encodeURIComponent(file.name)}`, {
+                    method: 'POST',
+                    body: file,
+                    credentials: 'same-origin',
+                });
+                if (!res.ok) throw new Error((await res.text()) || res.statusText);
+                const body = (await res.json()) as { path?: string };
+                if (!body.path) throw new Error('Upload did not return a path');
+                paths.push(body.path);
+            }
+            const text = paths.join('\n');
+            try {
+                await navigator.clipboard.writeText(text);
+                this.status.textContent = `Copied ${text}`;
+            } catch {
+                this.status.textContent = text;
+            }
+        } catch (err) {
+            this.status.textContent = err instanceof Error ? err.message : 'Upload failed';
+        }
+    }
 
     private persist(reset = false) {
         try {
