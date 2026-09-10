@@ -11,6 +11,7 @@ import { Unicode11Addon } from '@xterm/addon-unicode11';
 import { OverlayAddon } from './addons/overlay';
 import { ZmodemAddon } from './addons/zmodem';
 import { encodeInputFrames } from './input';
+import { captureBareAltKey } from './alt';
 import { TerminalSettings } from '../settings';
 
 import '@xterm/xterm/css/xterm.css';
@@ -73,9 +74,14 @@ function toDisposable(f: () => void): IDisposable {
     return { dispose: f };
 }
 
-function addEventListener(target: EventTarget, type: string, listener: EventListener): IDisposable {
-    target.addEventListener(type, listener);
-    return toDisposable(() => target.removeEventListener(type, listener));
+function addEventListener(
+    target: EventTarget,
+    type: string,
+    listener: EventListener,
+    options?: boolean | AddEventListenerOptions
+): IDisposable {
+    target.addEventListener(type, listener, options);
+    return toDisposable(() => target.removeEventListener(type, listener, options));
 }
 
 export class Xterm {
@@ -104,6 +110,7 @@ export class Xterm {
     private reconnect = true;
     private doReconnect = true;
     private closeOnDisconnect = false;
+    private altCapture: IDisposable[] = [];
 
     private writeFunc = (data: ArrayBuffer) => this.writeData(new Uint8Array(data));
 
@@ -121,6 +128,8 @@ export class Xterm {
 
     public disposeSettings() {
         this.settings?.dispose();
+        for (const d of this.altCapture) d.dispose();
+        this.altCapture.length = 0;
     }
 
     @bind
@@ -175,6 +184,13 @@ export class Xterm {
         terminal.open(parent);
         fitAddon.fit();
         this.settings = new TerminalSettings(terminal, () => fitAddon.fit());
+        // xterm.js does not cancel modifier-only Alt, so the browser steals it
+        // (menu bar, access keys). Keep this out of `disposables` so reconnect
+        // does not drop the capture.
+        this.altCapture.push(
+            addEventListener(window, 'keydown', this.onAltKey as EventListener, true),
+            addEventListener(window, 'keyup', this.onAltKey as EventListener, true)
+        );
     }
 
     @bind
@@ -211,6 +227,11 @@ export class Xterm {
         );
         register(addEventListener(window, 'resize', () => fitAddon.fit()));
         register(addEventListener(window, 'beforeunload', this.onWindowUnload));
+    }
+
+    @bind
+    private onAltKey(event: KeyboardEvent) {
+        captureBareAltKey(event, this.terminal?.element);
     }
 
     @bind
